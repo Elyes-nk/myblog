@@ -1,0 +1,27 @@
+
+.sidebar {
+    padding: 10px 0px;
+    width: 20%;
+  
+  .post{
+    // display: flex;
+    // justify-content: center;
+    // align-items: center;
+    padding: 10px 0px;
+
+  }
+  .img{
+    height: 50px;
+    width: 100%;
+    object-fit: cover;
+
+  }
+  .title{
+    font-size: 15px;
+    font-weight: 300;
+    &:hover {
+      color: teal;
+      cursor: pointer;
+    }
+  }
+}
