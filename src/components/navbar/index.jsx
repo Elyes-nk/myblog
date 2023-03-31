@@ -1,12 +1,17 @@
 import Image from "next/image";
 import Link from "next/link";
-import React, { useContext } from "react";
+import React, { useCallback, useContext } from "react";
 import { AuthContext } from "../../context/authContext";
 import Logo from "../../img/logo.png";
 import styles from "./navbar.module.scss";
 
 const Navbar = () => {
-  const { currentUser, logout } = useContext(AuthContext);
+  const { currentUser, setCurrentUser } = useContext(AuthContext);
+
+  const logout = useCallback(() => {
+    localStorage.setItem("user", null);
+    setCurrentUser(null);
+  }, [setCurrentUser]);
 
   return (
     <div className={styles.navbar}>
@@ -51,23 +56,21 @@ const Navbar = () => {
           >
             <h6>FOOD</h6>
           </Link>
-          <span>{currentUser?.username}</span>
           {currentUser ? (
             <span className={styles.write} onClick={logout}>
               Logout
             </span>
           ) : (
-            <span className={styles.write}>
-              <Link className={styles.link} href="/login">
-                Login
-              </Link>
-            </span>
+            <Link className={styles.link} href="/login">
+              <span className={styles.write}>Login</span>
+            </Link>
           )}
           <span className={styles.write}>
             <Link className={styles.link} href="/write">
               Write
             </Link>
           </span>
+          <span>{currentUser?.username}</span>
         </div>
       </div>
     </div>

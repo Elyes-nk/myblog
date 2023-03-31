@@ -1,8 +1,9 @@
 import React from "react";
 import { useState } from "react";
-import axios from "axios";
 import Link from "next/link";
 import styles from "../login/login.module.scss";
+import { useCreateUser } from "@/useRequest";
+import Typewriter from "typewriter-effect";
 
 const Register = () => {
   const [inputs, setInputs] = useState({
@@ -10,9 +11,9 @@ const Register = () => {
     email: "",
     password: "",
   });
-  const [err, setError] = useState(null);
 
-  // const navigate = useNavigate();
+  const { isLoading, refetch, isError, isSuccess, error, data } =
+    useCreateUser(inputs);
 
   const handleChange = (e) => {
     setInputs((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -20,12 +21,7 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      await axios.post("/auth/register", inputs);
-      navigate("/login");
-    } catch (err) {
-      setError(err.response.data);
-    }
+    refetch({ throwOnError: false, cancelRefetch: true });
   };
 
   return (
@@ -53,14 +49,33 @@ const Register = () => {
           name="password"
           onChange={handleChange}
         />
-        <button onClick={handleSubmit}>Register</button>
-        {err && <p>{err}</p>}
+        <button onClick={handleSubmit} disabled={isLoading}>
+          {isLoading ? (
+            <Typewriter
+              options={{
+                strings: ["Please wait.."],
+                autoStart: true,
+                loop: true,
+                deleteSpeed: 50,
+              }}
+            />
+          ) : (
+            "Register"
+          )}
+        </button>
         <span>
           Do you have an account?{" "}
           <Link href="/login" className={styles.link}>
             Login
           </Link>
         </span>
+        {isError && (
+          <React.Fragment>
+            {error.response.errors.map((error, idx) => (
+              <p key={idx}>{error.message}</p>
+            ))}
+          </React.Fragment>
+        )}
       </form>
     </div>
   );

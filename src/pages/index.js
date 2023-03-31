@@ -1,11 +1,13 @@
 import Footer from "@/components/footer/Footer";
-import Navbar from "@/components/navbar";
-import axios from "axios";
+import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import styles from "./index.module.scss";
+import Typewriter from "typewriter-effect";
+
+const Navbar = dynamic(() => import("@/components/navbar"), { ssr: false });
 
 export default function Home() {
   const router = useRouter();
@@ -88,7 +90,18 @@ export default function Home() {
                   <h1>{post.title}</h1>
                 </Link>
                 <p>{post.desc}</p>
-                <button>Read More</button>
+                <button>
+                  <Typewriter
+                    options={{
+                      strings: [
+                        "Read more..."
+                      ],
+                      autoStart: true,
+                      loop: true,
+                      deleteSpeed: 50,
+                    }}
+                  />
+                </button>
               </div>
             </div>
           ))}

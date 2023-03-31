@@ -1,3 +1,4 @@
+import { useLogin } from "@/useRequest";
 import axios from "axios";
 import { createContext, useEffect, useState } from "react";
 
@@ -10,22 +11,8 @@ export const AuthContexProvider = ({ children }) => {
       null
   );
 
-  const login = async (inputs) => {
-    const res = await axios.post("/auth/login", inputs);
-    setCurrentUser(res.data);
-  };
-
-  const logout = async (inputs) => {
-    await axios.post("/auth/logout");
-    setCurrentUser(null);
-  };
-
-  useEffect(() => {
-    localStorage.setItem("user", JSON.stringify(currentUser));
-  }, [currentUser]);
-
   return (
-    <AuthContext.Provider value={{ currentUser, login, logout }}>
+    <AuthContext.Provider value={{ currentUser, setCurrentUser }}>
       {children}
     </AuthContext.Provider>
   );

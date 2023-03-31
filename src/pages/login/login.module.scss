@@ -43,7 +43,12 @@
       cursor: pointer;
       color: white;
       border-radius: 8px;
-
+    }
+    button:disabled,
+    button[disabled]{
+      border: 1px solid #999999;
+      color: #666666;
+      background-color: rgb(154, 206, 206);
     }
 
     p {
