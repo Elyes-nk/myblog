@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import React from "react";
 import styles from "./index.module.scss";
-import Typewriter from "typewriter-effect";
 import { useGetPosts } from "@/useRequest";
 import { useContext } from "react";
 import { AuthContext } from "../context/authContext";
@@ -31,7 +30,7 @@ export default function Home() {
     options.user = currentUser?._id;
   }
 
-  const { isLoading, isError, error, data: posts } = useGetPosts({ cat });
+  const { isLoading, isError, error, data: posts } = useGetPosts({ options });
 
   const myLoader = ({ src, width, quality }) => {
     return `${src}?w=${width}&q=${quality || 75}`;
@@ -86,16 +85,7 @@ export default function Home() {
               <p>{post.desc || <Skeleton count={4} />}</p>
               {!isLoading && (
                 <div className={styles.postFooter}>
-                  <button>
-                    <Typewriter
-                      options={{
-                        strings: ["Read more..."],
-                        autoStart: true,
-                        loop: true,
-                        deleteSpeed: 50,
-                      }}
-                    />
-                  </button>
+                  <button>Read more</button>
                   <p>
                     Posted {moment(post.updatedAt).fromNow()} By{" "}
                     {post?.user?.username}
