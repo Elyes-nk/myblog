@@ -12,6 +12,7 @@ import { AuthContext } from "../context/authContext";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import moment from "moment";
+import Loading from "../img/loading.gif";
 
 const Navbar = dynamic(() => import("@/components/navbar"), { ssr: false });
 
@@ -35,6 +36,24 @@ export default function Home() {
   const myLoader = ({ src, width, quality }) => {
     return `${src}?w=${width}&q=${quality || 75}`;
   };
+
+  const LoadingContent = () => (
+    <div className={styles.emptyContent}>
+      <Image src={Loading} height={100} width={120} alt="loading" />
+    </div>
+  );
+
+  const ErrorContent = () => (
+    <div className={styles.emptyContent}>
+      <p>An error occured please retry later.</p>
+    </div>
+  );
+
+  const EmptyContent = () => (
+    <div className={styles.emptyContent}>
+      <p>No results {cat ? "for " + cat : ""}</p>
+    </div>
+  );
 
   const Content = () => (
     <div className={styles.home}>
@@ -90,16 +109,18 @@ export default function Home() {
     </div>
   );
 
-  const EmptyContent = () => (
-    <div className={styles.emptyContent}>
-      <p>No results {cat ? "for " + cat : ""}</p>
-    </div>
-  );
-
   return (
     <React.Fragment>
       <Navbar />
-      {posts?.length > 0 ? <Content /> : <EmptyContent />}
+      {isLoading ? (
+        <LoadingContent />
+      ) : isError ? (
+        <ErrorContent />
+      ) : posts?.length > 0 ? (
+        <Content />
+      ) : (
+        <EmptyContent />
+      )}
       <Footer />
     </React.Fragment>
   );
