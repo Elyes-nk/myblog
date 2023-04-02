@@ -3,76 +3,50 @@ import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import styles from "./index.module.scss";
 import Typewriter from "typewriter-effect";
+import { useGetPosts } from "@/useRequest";
+import { useContext } from "react";
+import { AuthContext } from "../context/authContext";
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
+import moment from "moment";
 
 const Navbar = dynamic(() => import("@/components/navbar"), { ssr: false });
 
 export default function Home() {
   const router = useRouter();
+  const { cat, myposts } = router.query;
+  const { currentUser } = useContext(AuthContext);
 
-  const { cat } = router.query;
+  const options = {};
 
-  // const [posts, setPosts] = useState([]);
+  if (cat) {
+    options.cat = cat;
+  }
 
-  // const cat = useLocation().search;
-  // const cat = "";
+  if (myposts) {
+    options.user = currentUser?._id;
+  }
 
-  //   const { isLoading, error, data } = useQuery('posts', () =>
-  //   fetch('https://api.github.com/repos/tannerlinsley/react-query').then(res =>
-  //     res.json()
-  //   )
-  // )
+  const { isLoading, isError, error, data: posts } = useGetPosts({ cat });
 
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //       const res = await axios.get(`/posts${cat}`);
-  //       setPosts(res.data);
-  //     } catch (err) {
-  //       console.log(err);
-  //     }
-  //   };
-  //   fetchData();
-  // }, [cat]);
-  const posts = [
-    {
-      id: 1,
-      title: "Lorem ipsum dolor sit amet consectetur adipisicing elit",
-      desc: "Lorem, ipsum dolor sit amet consectetur adipisicing elit. A possimus excepturi aliquid nihil cumque ipsam facere aperiam at! Ea dolorem ratione sit debitis deserunt repellendus numquam ab vel perspiciatis corporis!",
-      img: "https://images.pexels.com/photos/7008010/pexels-photo-7008010.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    },
-    {
-      id: 2,
-      title: "Lorem ipsum dolor sit amet consectetur adipisicing elit",
-      desc: "Lorem, ipsum dolor sit amet consectetur adipisicing elit. A possimus excepturi aliquid nihil cumque ipsam facere aperiam at! Ea dolorem ratione sit debitis deserunt repellendus numquam ab vel perspiciatis corporis!",
-      img: "https://images.pexels.com/photos/6489663/pexels-photo-6489663.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    },
-    {
-      id: 3,
-      title: "Lorem ipsum dolor sit amet consectetur adipisicing elit",
-      desc: "Lorem, ipsum dolor sit amet consectetur adipisicing elit. A possimus excepturi aliquid nihil cumque ipsam facere aperiam at! Ea dolorem ratione sit debitis deserunt repellendus numquam ab vel perspiciatis corporis!",
-      img: "https://images.pexels.com/photos/4230630/pexels-photo-4230630.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    },
-    {
-      id: 4,
-      title: "Lorem ipsum dolor sit amet consectetur adipisicing elit",
-      desc: "Lorem, ipsum dolor sit amet consectetur adipisicing elit. A possimus excepturi aliquid nihil cumque ipsam facere aperiam at! Ea dolorem ratione sit debitis deserunt repellendus numquam ab vel perspiciatis corporis!",
-      img: "https://images.pexels.com/photos/6157049/pexels-photo-6157049.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    },
-  ];
   const myLoader = ({ src, width, quality }) => {
     return `${src}?w=${width}&q=${quality || 75}`;
   };
-  return (
-    <React.Fragment>
-      <Navbar />
-      <div className={styles.home}>
-        <div className={styles.posts}>
-          {posts.map((post) => (
-            <div className={styles.post} key={post.id}>
-              <div className={styles.img}>
+
+  const Content = () => (
+    <div className={styles.home}>
+      <div className={styles.posts}>
+        {posts.map((post) => (
+          <div className={styles.post} key={post.id}>
+            <div className={styles.img}>
+              {isLoading ? (
+                <div className={styles.image}>
+                  <Skeleton style={{ height: 400, width: 470 }} />
+                </div>
+              ) : (
                 <Image
                   loader={myLoader}
                   src={post.img}
@@ -81,32 +55,51 @@ export default function Home() {
                   height={400}
                   width={100}
                 />
-              </div>
-              <div className={styles.content}>
-                <Link
-                  href={{ pathname: "/post", query: { postId: post.id } }}
-                  className={styles.link}
-                >
-                  <h1>{post.title}</h1>
-                </Link>
-                <p>{post.desc}</p>
-                <button>
-                  <Typewriter
-                    options={{
-                      strings: [
-                        "Read more..."
-                      ],
-                      autoStart: true,
-                      loop: true,
-                      deleteSpeed: 50,
-                    }}
-                  />
-                </button>
-              </div>
+              )}
             </div>
-          ))}
-        </div>
+            <div className={styles.content}>
+              <Link
+                href={{ pathname: "/post", query: { postId: post.id } }}
+                className={styles.link}
+              >
+                <h1>{post.title || <Skeleton />}</h1>
+              </Link>
+              <p>{post.desc || <Skeleton count={4} />}</p>
+              {!isLoading && (
+                <div className={styles.postFooter}>
+                  <button>
+                    <Typewriter
+                      options={{
+                        strings: ["Read more..."],
+                        autoStart: true,
+                        loop: true,
+                        deleteSpeed: 50,
+                      }}
+                    />
+                  </button>
+                  <p>
+                    Posted {moment(post.updatedAt).fromNow()} By{" "}
+                    {post?.user?.username}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        ))}
       </div>
+    </div>
+  );
+
+  const EmptyContent = () => (
+    <div className={styles.emptyContent}>
+      <p>No results {cat ? "for " + cat : ""}</p>
+    </div>
+  );
+
+  return (
+    <React.Fragment>
+      <Navbar />
+      {posts?.length > 0 ? <Content /> : <EmptyContent />}
       <Footer />
     </React.Fragment>
   );

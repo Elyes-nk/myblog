@@ -19,8 +19,8 @@ function useLogin({ username, password }) {
             login(username: $username, password: $password) {
               username
               profilePic
-              posts
               accessToken
+              _id
             }
           }
         `,
@@ -60,23 +60,28 @@ function useCreateUser({ username, email, password }) {
   );
 }
 
-function useGetPosts() {
-  return useQuery("get-posts", async () => {
-    const { getPostList } = await graphQLClient.request(gql`
-      query {
-        getPostList {
-          items {
+function useGetPosts(options = {}) {
+  return useQuery(["get-posts", options], async () => {
+    const { cat, user } = options;
+    const { getPosts } = await graphQLClient.request(
+      gql`
+        query GetPosts($user: ID, $cat: String) {
+          getPosts(user: $user, cat: $cat) {
             _id
             title
             desc
             img
             draft
-            user
+            updatedAt
+            user {
+              username
+            }
           }
         }
-      }
-    `);
-    return getPostList;
+      `,
+      { user, cat }
+    );
+    return getPosts;
   });
 }
 
@@ -84,14 +89,16 @@ function useGetPost(postId) {
   return useQuery(["get-post", postId], async () => {
     const { getPost } = await graphQLClient.request(
       gql`
-        query getPost($postId: ID!) {
+        query GetPost($postId: ID!) {
           getPost(id: $postId) {
             _id
             title
             desc
             img
             draft
-            user
+            user {
+              username
+            }
           }
         }
       `,

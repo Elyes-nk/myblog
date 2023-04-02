@@ -51,6 +51,15 @@
         flex-direction: column;
         justify-content: space-between;
 
+        .postFooter{
+          display: flex;
+          justify-content: space-between;
+
+          p{
+            font-size: 12px;
+          }
+        }
+
         h1 {
           font-size: 48px;
         }
@@ -76,6 +85,14 @@
           }
         }
       }
+    
     }
   }
+}
+
+.emptyContent{
+  height: 500px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

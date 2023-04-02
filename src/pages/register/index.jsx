@@ -12,8 +12,11 @@ const Register = () => {
     password: "",
   });
 
-  const { isLoading, refetch, isError, isSuccess, error, data } =
-    useCreateUser(inputs);
+  const { isLoading, refetch, isError, error, data } = useCreateUser(inputs);
+
+  if (data) {
+    Router.push("/");
+  }
 
   const handleChange = (e) => {
     setInputs((prev) => ({ ...prev, [e.target.name]: e.target.value }));
