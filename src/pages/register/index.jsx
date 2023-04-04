@@ -12,7 +12,7 @@ const Register = () => {
     password: "",
   });
 
-  const { isLoading, refetch, isError, error, data } = useCreateUser(inputs);
+  const { isLoading, mutate, isError, error, data } = useCreateUser(inputs);
 
   if (data) {
     Router.push("/");
@@ -24,7 +24,7 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    refetch({ throwOnError: false, cancelRefetch: true });
+    mutate();
   };
 
   return (

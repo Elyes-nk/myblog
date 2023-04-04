@@ -56,16 +56,19 @@ const Navbar = () => {
           >
             <h6>FOOD</h6>
           </Link>
-          <Link
-            className={styles.link}
-            href={{ pathname: "/", query: { myposts: true } }}
-          >
-            <h6>MY POSTS</h6>
-          </Link>
+
           {currentUser ? (
-            <span className={styles.write} onClick={logout}>
-              Logout
-            </span>
+            <>
+              <Link
+                className={styles.link}
+                href={{ pathname: "/", query: { myposts: true } }}
+              >
+                <h6>MY POSTS</h6>
+              </Link>
+              <span className={styles.write} onClick={logout}>
+                Logout
+              </span>
+            </>
           ) : (
             <Link className={styles.link} href="/login">
               <span className={styles.write}>Login</span>

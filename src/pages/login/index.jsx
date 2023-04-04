@@ -15,7 +15,7 @@ const Login = () => {
 
   const { setCurrentUser } = useContext(AuthContext);
 
-  const { isLoading, refetch, isError, error, data, ...other } =
+  const { isLoading, mutate, isError, error, data, ...other } =
     useLogin(inputs);
 
   if (data) {
@@ -30,7 +30,7 @@ const Login = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    refetch({ throwOnError: false, cancelRefetch: true });
+    mutate();
   };
 
   return (

@@ -1,4 +1,4 @@
-import { useQuery } from "react-query";
+import { useMutation, useQuery } from "react-query";
 import { GraphQLClient, gql } from "graphql-request";
 
 const API_URL = `http://localhost:3030/graphql`;
@@ -10,8 +10,7 @@ const graphQLClient = new GraphQLClient(API_URL, {
 });
 
 function useLogin({ username, password }) {
-  return useQuery(
-    ["login", username],
+  return useMutation(
     async () => {
       const { login } = await graphQLClient.request(
         gql`
@@ -33,8 +32,7 @@ function useLogin({ username, password }) {
 }
 
 function useCreateUser({ username, email, password }) {
-  return useQuery(
-    ["create-user", username],
+  return useMutation(
     async () => {
       const { createUser } = await graphQLClient.request(
         gql`
@@ -62,15 +60,16 @@ function useCreateUser({ username, email, password }) {
 
 function useGetPosts(options = {}) {
   return useQuery(["get-posts", options], async () => {
-    const { cat, user } = options;
+    const { cat, user, withDraft } = options;
     const { getPosts } = await graphQLClient.request(
       gql`
-        query GetPosts($user: ID, $cat: String) {
-          getPosts(user: $user, cat: $cat) {
+        query GetPosts($user: ID, $cat: String, $withDraft: Boolean) {
+          getPosts(user: $user, cat: $cat, withDraft: $withDraft) {
             _id
             title
             desc
             img
+            cat
             draft
             updatedAt
             user {
@@ -79,7 +78,7 @@ function useGetPosts(options = {}) {
           }
         }
       `,
-      { user, cat }
+      { user, cat, withDraft }
     );
     return getPosts;
   });
@@ -108,4 +107,67 @@ function useGetPost(postId) {
   });
 }
 
-export { useLogin, useCreateUser, useGetPost, useGetPosts };
+function useDelete(postId) {
+  return useMutation(async (id) => {
+    const { createUser } = await graphQLClient.request(
+      gql`
+        query DeletePost($deletePostId: ID!) {
+          deletePost(id: $deletePostId)
+        }
+      `,
+      { deletePostId: postId }
+    );
+    return createUser;
+  });
+}
+
+function useCreatePost({ desc, title, cat, img, draft, user }) {
+  return useMutation(
+    async () => {
+      const { createPost } = await graphQLClient.request(
+        gql`
+          mutation CreatePost(
+            $desc: String
+            $title: String
+            $cat: String
+            $img: String
+            $draft: Boolean
+            $user: ID!
+          ) {
+            createPost(
+              desc: $desc
+              title: $title
+              cat: $cat
+              img: $img
+              draft: $draft
+              user: $user
+            ) {
+              _id
+              title
+              desc
+              img
+              cat
+              draft
+              updatedAt
+              user {
+                username
+              }
+            }
+          }
+        `,
+        { desc, title, cat, img, draft, user }
+      );
+      return createPost;
+    },
+    { enabled: false, manual: true }
+  );
+}
+
+export {
+  useLogin,
+  useCreateUser,
+  useGetPost,
+  useGetPosts,
+  useDelete,
+  useCreatePost,
+};

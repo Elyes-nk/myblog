@@ -12,6 +12,7 @@ import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import moment from "moment";
 import Loading from "../img/loading.gif";
+import { getText } from "@/helpers";
 
 const Navbar = dynamic(() => import("@/components/navbar"), { ssr: false });
 
@@ -28,10 +29,12 @@ export default function Home() {
 
   if (myposts) {
     options.user = currentUser?._id;
+    options.withDraft = true;
   }
 
-  const { isLoading, isError, error, data: posts } = useGetPosts({ options });
+  const { isLoading, isError, data: posts } = useGetPosts(options);
 
+  // Load url image
   const myLoader = ({ src, width, quality }) => {
     return `${src}?w=${width}&q=${quality || 75}`;
   };
@@ -77,18 +80,29 @@ export default function Home() {
             </div>
             <div className={styles.content}>
               <Link
-                href={{ pathname: "/post", query: { postId: post.id } }}
+                href={{
+                  pathname: "/post",
+                  query: { post: JSON.stringify(post) },
+                }}
                 className={styles.link}
               >
                 <h1>{post.title || <Skeleton />}</h1>
               </Link>
-              <p>{post.desc || <Skeleton count={4} />}</p>
+              <p>{getText(post.desc) || <Skeleton count={4} />}</p>
               {!isLoading && (
                 <div className={styles.postFooter}>
-                  <button>Read more</button>
+                  <Link
+                    href={{
+                      pathname: "/post",
+                      query: { post: JSON.stringify(post) },
+                    }}
+                    className={styles.link}
+                  >
+                    <button>Read more</button>
+                  </Link>
                   <p>
-                    Posted {moment(post.updatedAt).fromNow()} By{" "}
-                    {post?.user?.username}
+                    {post.draft ? "Draft created" : "Posted"}{" "}
+                    {moment(post.updatedAt).fromNow()} By {post?.user?.username}
                   </p>
                 </div>
               )}
