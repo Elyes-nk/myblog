@@ -16,12 +16,17 @@
     object-fit: cover;
 
   }
-  .title{
-    font-size: 15px;
-    font-weight: 300;
+  .link {
+    a{
+      color: inherit;
+      font-weight: 300;
+      font-size: 15px;
+      text-decoration: none;
+    }
     &:hover {
       color: teal;
       cursor: pointer;
     }
   }
+
 }

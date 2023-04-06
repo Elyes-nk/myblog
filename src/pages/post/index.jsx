@@ -6,25 +6,36 @@ import { useContext } from "react";
 import { AuthContext } from "../../context/authContext";
 import styles from "./single.module.scss";
 import Link from "next/link";
-import Navbar from "@/components/navbar";
 import Footer from "@/components/footer/Footer";
 import Sidebar from "@/components/sidebar";
 import Image from "next/image";
 import DOMPurify from "dompurify";
 import { useRouter } from "next/router";
 import { useDelete } from "@/useRequest";
+import dynamic from "next/dynamic";
+import Router from "next/router";
+
+const Navbar = dynamic(() => import("@/components/navbar"), { ssr: false });
 
 const Post = () => {
   const router = useRouter();
   const { post: data } = router.query;
   const { currentUser } = useContext(AuthContext);
+  const post = data ? JSON.parse(data) : null;
 
-  const post = data ? JSON.parse(data) : {};
+  const { mutate, isSuccess } = useDelete(post?._id);
 
-  const { mutate } = useDelete();
+  if (isSuccess) {
+    Router.push("/");
+  }
 
   const myLoader = ({ src, width, quality }) => {
     return `${src}?w=${width}&q=${quality || 75}`;
+  };
+
+  const sanitize = (text) => {
+    const isBrowser = typeof window !== "undefined";
+    return isBrowser ? DOMPurify.sanitize(text) : null;
   };
 
   return (
@@ -32,23 +43,17 @@ const Post = () => {
       <Navbar />
       <div className={styles.single}>
         <div className={styles.content}>
-          <Image
-            src={post?.img}
-            alt=""
-            className={styles.img}
-            loader={myLoader}
-            height={400}
-            width={100}
-          />
+          {post?.img && (
+            <Image
+              src={post?.img}
+              alt=""
+              className={styles.img}
+              loader={myLoader}
+              height={400}
+              width={100}
+            />
+          )}
           <div className={styles.user}>
-            {post?.userImg && (
-              <Image
-                src={post?.userImg}
-                className={styles.smallImg}
-                alt=""
-                loader={myLoader}
-              />
-            )}
             <div className={styles.info}>
               <span>{post?.username}</span>
               <p>Posted {moment(post?.updatedAt).fromNow()}</p>
@@ -64,7 +69,9 @@ const Post = () => {
                   <Image src={Edit} alt="" className={styles.smallImg} />
                 </Link>
                 <Image
-                  onClick={() => mutate(post?._id)}
+                  onClick={() => {
+                    mutate(post?._id);
+                  }}
                   src={Delete}
                   alt=""
                   className={styles.smallImg}
@@ -75,7 +82,7 @@ const Post = () => {
           <h1>{post?.title}</h1>
           <p
             dangerouslySetInnerHTML={{
-              __html: DOMPurify.sanitize(post?.desc),
+              __html: sanitize(post?.desc),
             }}
           ></p>
         </div>

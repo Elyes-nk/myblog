@@ -1,23 +1,21 @@
-import React, { useContext, useState } from "react";
-// import ReactQuill from "react-quill";
+import React, { Suspense, useContext, useState } from "react";
 import "react-quill/dist/quill.snow.css";
-import axios from "axios";
-import moment from "moment";
 import styles from "./write.module.scss";
 import dynamic from "next/dynamic";
 import Footer from "@/components/footer/Footer";
-import Navbar from "@/components/navbar";
 import { useRouter } from "next/router";
-import { useCreatePost } from "@/useRequest";
+import { useCreatePost, useSaveImage } from "@/useRequest";
 import { AuthContext } from "@/context/authContext";
 import Router from "next/router";
+import Image from "next/image";
 
 const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
+const Navbar = dynamic(() => import("@/components/navbar"), { ssr: false });
 
 const Write = () => {
   const router = useRouter();
   const { post: data } = router.query;
-  const post = data ? JSON.parse(data) : {};
+  const post = data ? JSON.parse(data) : null;
 
   const { currentUser } = useContext(AuthContext);
 
@@ -31,6 +29,7 @@ const Write = () => {
           title: "",
           cat: "",
           user: currentUser?._id,
+          draft: true,
         }
   );
 
@@ -38,42 +37,19 @@ const Write = () => {
     setInputs((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const {
-    isLoading,
-    isSuccess,
-    mutate,
-    data: createdPost,
-  } = useCreatePost({ ...inputs, desc });
+  const { isLoading, isSuccess, mutate, isError } = useCreatePost(file, {
+    ...inputs,
+    desc,
+  });
 
-  const upload = async () => {
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-      const res = await axios.post("/upload", formData);
-      return res.data;
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
-  const save = () => {
-    // save image
-    mutate();
-    if (isSuccess) {
-      Router.push({ pathname: "/post", query: JSON.stringify(createdPost) });
-    }
-  };
-
-  const handleClickSaveDraft = async (e) => {
-    e.preventDefault();
-    setInputs((prev) => ({ ...prev, draft: true }));
-    save();
-  };
+  if (isSuccess) {
+    Router.push("/");
+  }
 
   const handleClickPublish = async (e) => {
     e.preventDefault();
     setInputs((prev) => ({ ...prev, draft: false }));
-    save();
+    mutate();
   };
 
   return (
@@ -83,7 +59,7 @@ const Write = () => {
         <div className={styles.content}>
           <input
             type="text"
-            value={inputs.title || "Title"}
+            value={inputs.title}
             name="title"
             onChange={(e) => handleChange(e)}
           />
@@ -101,6 +77,7 @@ const Write = () => {
               {isLoading ? "Please wait" : "Publish"}
             </button>
           </div>
+          {isError && <p style={{ color: "red" }}>Something went wrong</p>}
         </div>
         <div className={styles.menu}>
           <div className={styles.item}>
@@ -115,33 +92,38 @@ const Write = () => {
               name=""
               onChange={(e) => setFile(e.target.files[0])}
             />
+            {file && (
+              <Image
+                className={styles.smallImage}
+                src={URL.createObjectURL(file)}
+                alt="ae"
+                height={70}
+                width={70}
+              />
+            )}
             <label className={styles.file} htmlFor="file">
               Upload Image
             </label>
           </div>
           <div className={styles.item}>
             <h1>Visibility</h1>
-            <div className={styles.cat}>
-              <input
-                type="radio"
-                checked={inputs?.draft === true}
-                name="draft"
-                value={true}
-                id="draft"
-                onChange={(e) => handleChange(e)}
-              />
-              <label htmlFor="art">Draft</label>
+            <div
+              className={styles.cat}
+              onClick={() =>
+                setInputs((prev) => ({ ...prev, draft: !inputs?.draft }))
+              }
+            >
+              <input type="radio" checked={inputs?.draft} />
+              <label htmlFor="draft">Draft</label>
             </div>
-            <div className={styles.cat}>
-              <input
-                type="radio"
-                checked={inputs?.draft === false}
-                name="draft"
-                value={false}
-                id="draft"
-                onChange={(e) => handleChange(e)}
-              />
-              <label htmlFor="science">Public</label>
+            <div
+              className={styles.cat}
+              onClick={() =>
+                setInputs((prev) => ({ ...prev, draft: !inputs?.draft }))
+              }
+            >
+              <input type="radio" checked={!inputs?.draft} />
+              <label htmlFor="draft">Public</label>
             </div>
           </div>
           <div className={styles.item}>
@@ -186,7 +168,7 @@ const Write = () => {
                 name="cat"
                 value="cinema"
                 id="cinema"
-                onChange={(e) => handleChange(e.target)}
+                onChange={(e) => handleChange(e)}
               />
               <label htmlFor="cinema">Cinema</label>
             </div>

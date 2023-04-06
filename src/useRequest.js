@@ -108,10 +108,10 @@ function useGetPost(postId) {
 }
 
 function useDelete(postId) {
-  return useMutation(async (id) => {
+  return useMutation(async () => {
     const { createUser } = await graphQLClient.request(
       gql`
-        query DeletePost($deletePostId: ID!) {
+        mutation DeletePost($deletePostId: ID!) {
           deletePost(id: $deletePostId)
         }
       `,
@@ -121,9 +121,24 @@ function useDelete(postId) {
   });
 }
 
-function useCreatePost({ desc, title, cat, img, draft, user }) {
+function useCreatePost(file, { desc, title, cat, img, draft, user }) {
   return useMutation(
     async () => {
+      const data = new FormData();
+      data.append("file", file);
+      data.append("upload_preset", "ymp6ekgg");
+      data.append("cloud_name", "doieuxngb");
+      const imageUrl = await fetch(
+        "https://api.cloudinary.com/v1_1/doieuxngb/image/upload",
+        {
+          method: "POST",
+          body: data,
+        }
+      )
+        .then((res) => res.json())
+        .then((data) => {
+          return data.secure_url;
+        });
       const { createPost } = await graphQLClient.request(
         gql`
           mutation CreatePost(
@@ -155,7 +170,7 @@ function useCreatePost({ desc, title, cat, img, draft, user }) {
             }
           }
         `,
-        { desc, title, cat, img, draft, user }
+        { desc, title, cat, img: imageUrl || img, draft, user }
       );
       return createPost;
     },
@@ -169,5 +184,5 @@ export {
   useGetPost,
   useGetPosts,
   useDelete,
-  useCreatePost,
+  useCreatePost
 };

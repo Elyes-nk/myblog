@@ -24,37 +24,38 @@ const Navbar = () => {
             className={styles.link}
             href={{ pathname: "/", query: { cat: "art" } }}
           >
-            <h6>ART</h6>
+            ART
           </Link>
           <Link
             className={styles.link}
             href={{ pathname: "/", query: { cat: "science" } }}
           >
-            <h6>SCIENCE</h6>
+            SCIENCE
           </Link>
           <Link
             className={styles.link}
             href={{ pathname: "/", query: { cat: "technology" } }}
           >
-            <h6>TECHNOLOGY</h6>
+            TECHNOLOGY
           </Link>
           <Link
             className={styles.link}
             href={{ pathname: "/", query: { cat: "cinema" } }}
           >
-            <h6>CINEMA</h6>
+            CINEMA
           </Link>
           <Link
             className={styles.link}
             href={{ pathname: "/", query: { cat: "design" } }}
           >
-            <h6>DESIGN</h6>
+            DESIGN
           </Link>
+
           <Link
             className={styles.link}
             href={{ pathname: "/", query: { cat: "food" } }}
           >
-            <h6>FOOD</h6>
+            FOOD
           </Link>
 
           {currentUser ? (
@@ -63,7 +64,7 @@ const Navbar = () => {
                 className={styles.link}
                 href={{ pathname: "/", query: { myposts: true } }}
               >
-                <h6>MY POSTS</h6>
+                MY POSTS
               </Link>
               <span className={styles.write} onClick={logout}>
                 Logout

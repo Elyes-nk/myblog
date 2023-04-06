@@ -1,68 +1,44 @@
-import axios from "axios";
 import Image from "next/image";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import styles from "./sidebar.module.scss";
+import { useGetPosts } from "@/useRequest";
+import Link from "next/link";
 
 const Menu = ({ cat }) => {
-  // const [posts, setPosts] = useState([]);
-
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //       const res = await axios.get(`/posts/?cat=${cat}`);
-  //       setPosts(res.data);
-  //     } catch (err) {
-  //       console.log(err);
-  //     }
-  //   };
-  //   fetchData();
-  // }, [cat]);
-  const posts = [
-    {
-      id: 1,
-      title: "Lorem ipsum dolor sit amet consectetur adipisicing elit",
-      desc: "Lorem, ipsum dolor sit amet consectetur adipisicing elit. A possimus excepturi aliquid nihil cumque ipsam facere aperiam at! Ea dolorem ratione sit debitis deserunt repellendus numquam ab vel perspiciatis corporis!",
-      img: "https://images.pexels.com/photos/7008010/pexels-photo-7008010.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    },
-    {
-      id: 2,
-      title: "Lorem ipsum dolor sit amet consectetur adipisicing elit",
-      desc: "Lorem, ipsum dolor sit amet consectetur adipisicing elit. A possimus excepturi aliquid nihil cumque ipsam facere aperiam at! Ea dolorem ratione sit debitis deserunt repellendus numquam ab vel perspiciatis corporis!",
-      img: "https://images.pexels.com/photos/6489663/pexels-photo-6489663.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    },
-    {
-      id: 3,
-      title: "Lorem ipsum dolor sit amet consectetur adipisicing elit",
-      desc: "Lorem, ipsum dolor sit amet consectetur adipisicing elit. A possimus excepturi aliquid nihil cumque ipsam facere aperiam at! Ea dolorem ratione sit debitis deserunt repellendus numquam ab vel perspiciatis corporis!",
-      img: "https://images.pexels.com/photos/4230630/pexels-photo-4230630.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    },
-    {
-      id: 4,
-      title: "Lorem ipsum dolor sit amet consectetur adipisicing elit",
-      desc: "Lorem, ipsum dolor sit amet consectetur adipisicing elit. A possimus excepturi aliquid nihil cumque ipsam facere aperiam at! Ea dolorem ratione sit debitis deserunt repellendus numquam ab vel perspiciatis corporis!",
-      img: "https://images.pexels.com/photos/6157049/pexels-photo-6157049.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    },
-  ];
+  const { isLoading, isError, data } = useGetPosts();
+  const posts = data?.slice(0, 5);
 
   const myLoader = ({ src, width, quality }) => {
     return `${src}?w=${width}&q=${quality || 75}`;
   };
+  if (isLoading || isError) {
+    return null;
+  }
   return (
     <div className={styles.sidebar}>
       <h1>Other posts you may like</h1>
       {posts.map((post) => (
         <div className={styles.post} key={post.id}>
-          <Image
-            src={post?.img}
-            className={styles.img}
-            width={400}
-            height={50}
-            alt=""
-            loader={myLoader}
-          />
-          <div className={styles.postContent}>
-            <h2 className={styles.title}>{post.title}</h2>
-          </div>
+          {post?.img && (
+            <Image
+              src={post?.img}
+              className={styles.img}
+              width={400}
+              height={50}
+              alt=""
+              loader={myLoader}
+            />
+          )}
+          <h2 className={styles.link}>
+            <Link
+              href={{
+                pathname: "/post",
+                query: { post: JSON.stringify(post) },
+              }}
+            >
+              {post.title}
+            </Link>
+          </h2>
         </div>
       ))}
     </div>

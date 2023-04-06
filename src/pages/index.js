@@ -68,14 +68,18 @@ export default function Home() {
                   <Skeleton style={{ height: 400, width: 470 }} />
                 </div>
               ) : (
-                <Image
-                  loader={myLoader}
-                  src={post.img}
-                  className={styles.image}
-                  alt=""
-                  height={400}
-                  width={100}
-                />
+                <>
+                  {post?.img && (
+                    <Image
+                      loader={myLoader}
+                      src={post.img}
+                      className={styles.image}
+                      alt=""
+                      height={400}
+                      width={100}
+                    />
+                  )}
+                </>
               )}
             </div>
             <div className={styles.content}>
